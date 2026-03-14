@@ -5,11 +5,14 @@ import threading
 from git import Repo, exc
 from watchdog.events import FileSystemEventHandler
 
+from config_loader import CommonConfig, GitConfig
+
 logger = logging.getLogger("NoteSync")
 
+
 class SyncManager:
-    def __init__(self, common_cfg, git_cfg, on_status_change):
-        repo_path = common_cfg['vault_path']
+    def __init__(self, common_cfg: CommonConfig, git_cfg: GitConfig, on_status_change):
+        repo_path = common_cfg.vault_path
         self.repo_path = repo_path
         self.git_cfg = git_cfg
         self.on_status_change = on_status_change
@@ -28,9 +31,9 @@ class SyncManager:
     def sync(self):
         if not self.repo: return
 
-        remote_name = self.git_cfg['remote_name']
-        branch_name = self.git_cfg['branch_name']
-        commit_message = self.git_cfg['commit_message']
+        remote_name = self.git_cfg.remote_name
+        branch_name = self.git_cfg.branch_name
+        commit_message = self.git_cfg.commit_message
 
         self._notify("sync")  # TrayIconManager의 "sync" 키와 일치시킴
 
@@ -61,10 +64,10 @@ class SyncManager:
 
 
 class DebounceHandler(FileSystemEventHandler):
-    def __init__(self, manager, common_cfg):
+    def __init__(self, manager, common_cfg: CommonConfig):
         self.manager = manager
         self.timer = None
-        self.wait_time = common_cfg['wait_time']
+        self.wait_time = common_cfg.wait_time
 
     def on_modified(self, event):
         if not event.is_directory and event.src_path.endswith(".md"):
