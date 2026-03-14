@@ -1,4 +1,4 @@
-from ui_manager import TrayIconManager
+from src.ui_manager import TrayIconManager
 
 
 def test_tray_menu_text_update(mocker):

@@ -1,4 +1,4 @@
-from sync_manager import SyncManager
+from src.sync_manager import SyncManager
 
 
 def test_sync_status_cycle(mocker):

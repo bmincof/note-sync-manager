@@ -1,4 +1,4 @@
-from config_loader import load_app_config, AppConfig
+from src.config_loader import load_app_config, AppConfig
 
 
 def test_config_loading(tmp_path):

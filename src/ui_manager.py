@@ -61,7 +61,7 @@ class TrayIconManager:
         return pystray.Menu(
             Item(display_text, lambda: None, enabled=False),
             Item('Open Logs', lambda i, j: self.open_file(self.log_file_path)),
-            Item('Edit Config', lambda i, j: self.open_file("config.yaml")),
+            Item('Edit Config', lambda i, j: self.open_file("resources/config.yaml")),
             Item('Quit', self.on_quit)
         )
 
