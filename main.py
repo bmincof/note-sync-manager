@@ -1,11 +1,15 @@
 import logging
 import os
+import platform
+import subprocess
 import threading
-import time
 from logging.handlers import RotatingFileHandler
 
+import pystray
 import yaml
+from PIL import Image, ImageDraw
 from git import Repo, exc
+from pystray import MenuItem as Item
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
@@ -62,8 +66,8 @@ class SyncManager:
 
     def sync(self):
         if not self.repo: return
-
         git_cfg = config['git']
+
         try:
             logger.info("Synchronization process started")
 
@@ -104,21 +108,63 @@ class DebounceHandler(FileSystemEventHandler):
             logger.debug(f"Change detected: {os.path.basename(event.src_path)}. Sync scheduled in {self.wait_time}s")
 
 
-# --- 4. 메인 실행부 ---
+# --- 4. 트레이 아이콘 및 유틸리티 ---
+def open_file(path):
+    """OS별 파일 열기 기능 (윈도우/맥 범용)"""
+    if not os.path.exists(path):
+        logger.error(f"File not found: {path}")
+        return
+    current_os = platform.system()
+    if current_os == "Darwin":  # macOS
+        subprocess.run(["open", path])
+    elif current_os == "Windows":
+        os.startfile(path)
+
+
+def create_placeholder_image():
+    """임시 아이콘 생성"""
+    width, height = 64, 64
+    image = Image.new('RGB', (width, height), color=(73, 109, 137))
+    dc = ImageDraw.Draw(image)
+    dc.rectangle([width // 4, height // 4, width * 3 // 4, height * 3 // 4], fill=(255, 255, 255))
+    return image
+
+
+def on_quit(icon, item):
+    logger.info("Agent termination requested via tray menu")
+    icon.stop()
+
+
+def setup_tray():
+    menu = (
+        Item('Status: Monitoring', lambda: None, enabled=False),
+        Item('Open Logs', lambda: open_file(config['logging']['file_path'])),
+        Item('Edit Config', lambda: open_file("config.yaml")),
+        Item('Quit', on_quit)
+    )
+    icon = pystray.Icon("ObsidianSync", create_placeholder_image(), "Obsidian Sync Agent", menu)
+    return icon
+
+
+# --- 5. 메인 실행부 ---
 if __name__ == "__main__":
     vault_path = config['common']['vault_path']
     manager = SyncManager(vault_path)
     event_handler = DebounceHandler(manager)
 
+    # Watchdog 감시 시작
     observer = Observer()
     observer.schedule(event_handler, vault_path, recursive=True)
     observer.start()
 
-    logger.info(f"Agent is running. Monitoring: {vault_path}")
+    # 트레이 아이콘 실행 (메인 스레드 점유)
+    icon = setup_tray()
+    logger.info(f"Agent started. Monitoring: {vault_path}")
+
     try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        logger.info("Agent termination requested by user")
+        icon.run()
+    finally:
+        # 아이콘 종료 시(Quit 클릭 시) 감시자도 안전하게 종료
         observer.stop()
-    observer.join()
+        observer.join()
+        logger.info("Agent shutdown complete.")
