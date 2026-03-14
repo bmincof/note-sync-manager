@@ -8,7 +8,7 @@ git:
   commit_message: "Auto-sync: Laptop"
 
 logging:
-  file_path: "sync.log"
+  file_path: "logs/sync.log"
   max_bytes: 5242880  # 5MB (로그 파일 최대 크기)
   backup_count: 3 # 로그 파일 로테이션 개수
   level: "INFO"
