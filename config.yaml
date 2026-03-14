@@ -1,0 +1,15 @@
+# Obsidian 자동 동기화 설정
+common:
+  vault_path: "/Users/..."  # 옵시디언 보관소 경로
+  wait_time: 5.0  # 디바운싱 대기 시간 (초)
+
+git:
+  remote_name: "origin"
+  branch_name: "main"
+  commit_message: "Auto-sync: Laptop"
+
+logging:
+  file_path: "sync.log"
+  max_bytes: 5242880  # 5MB (로그 파일 최대 크기)
+  backup_count: 3 # 로그 파일 로테이션 개수
+  level: "INFO"
