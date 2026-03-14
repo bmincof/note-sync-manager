@@ -31,7 +31,7 @@ class AppConfig:
     common: CommonConfig
 
 
-def load_app_config(config_path="config.yaml") -> AppConfig:
+def load_app_config(config_path="resources/config.yaml") -> AppConfig:
     with open(config_path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
 

@@ -15,7 +15,7 @@ logger = logging.getLogger("NoteSync")
 class TrayIconManager:
     def __init__(self, log_cfg: LoggingConfig):
         self.log_file_path = log_cfg.file_path
-        self.icon = self._load_image("icon.png")
+        self.icon = self._load_image("resources/icon.png")
         self.current_status = "idle"
         # 상태별 메뉴에 노출될 텍스트 맵
         self.status_texts = {
